@@ -1,0 +1,2 @@
+# StickyBit
+This folder contains some systemic applications (examples are multithreading programs, multitasking programs,etc..). Level of difficulty is didactic, so sorry for eventual technical mistakes. They could be useful for: students who are studying OS, people who are starting concurrent programming. I hope it could help people improving their acknowledgment about this issues (me as well, sharing it :) ).
