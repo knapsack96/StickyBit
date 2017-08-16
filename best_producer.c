@@ -7,22 +7,22 @@
 #include <time.h>
 
 //global stuff
-int **matrice;
+int **matrix;
 pthread_t tid[3];
-struct tipo {
+struct type {
  int val;
  pthread_t id;
 };
-struct tipo *stack;
+struct type *stack;
 int stack_iterator;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t var_cond = PTHREAD_COND_INITIALIZER;
-sem_t *sem_con_nome;
+sem_t *sem_with_name;
 int n;
 
 //prototypes
-void *produttore(void *args);
-void *consumatore(void *args);
+void *producer(void *args);
+void *consumer(void *args);
 
 //text segment
 int main(int args, char *argv[]) {
@@ -31,42 +31,42 @@ int main(int args, char *argv[]) {
  int i,j;
  pthread_t ltid;
  n = atoi(argv[1]);
- sem_con_nome = sem_open("sem_con_nome",O_CREAT,0644,1);
- if(sem_con_nome == (void *)-1 ) {
+ sem_with_name = sem_open("sem_with_name",O_CREAT,0644,1);
+ if(sem_with_name == (void *)-1 ) {
   printf("An error occured while creating semaphore\n");
   exit(0);
  }
 
  //dynamic allocation
- matrice = malloc(sizeof(int*)*n);
- if(matrice == (void *)-1 ) {
+ matrix = malloc(sizeof(int*)*n);
+ if(matrix == (void *)-1 ) {
   printf("An error occured while allocating matrix\n");
   exit(0);
  }
- stack = malloc(sizeof(struct tipo)*n*n);
+ stack = malloc(sizeof(struct type)*n*n);
  if(stack == (void *)-1 ) {
   printf("An error occured while allocating stack\n");
   exit(0);
  }
  printf("Matrix:\n");
  for(i=0;i<n;i++) {
-  matrice[i] = malloc(sizeof(int)*n);
-  if(matrice[i] == (void *)-1 ) {
+  matrix[i] = malloc(sizeof(int)*n);
+  if(matrix[i] == (void *)-1 ) {
    printf("An error occured while allocating matrix\n");
    exit(0);
   }
   for(j=0;j<n;j++) {
-   matrice[i][j] = rand()%10;
-   printf("%d ",matrice[i][j]);
+   matrix[i][j] = rand()%10;
+   printf("%d ",matrix[i][j]);
   }
   printf("\n");
  }
- if(pthread_create(&ltid,NULL,consumatore,NULL)==-1) {
+ if(pthread_create(&ltid,NULL,consumer,NULL)==-1) {
   printf("An error occured while creating thread\n");
   exit(0);
  }
  for(i=0;i<3;i++) {
-  if(pthread_create(&tid[i],NULL,produttore,NULL)==-1) {
+  if(pthread_create(&tid[i],NULL,producer,NULL)==-1) {
    printf("An error occured while creating thread\n");
    exit(0);
   }
@@ -79,7 +79,7 @@ int main(int args, char *argv[]) {
 }
 
 //3 producer threads
-void *produttore(void *args) {
+void *producer(void *args) {
  int i,j;
  struct timespec req;
  req.tv_nsec=5000;
@@ -90,29 +90,29 @@ void *produttore(void *args) {
   //critical section
   nanosleep(&req, NULL); //necessary for concurrency
 
-  sem_wait(sem_con_nome);
+  sem_wait(sem_with_name);
   if(stack_iterator == n*n) {
    pthread_cond_signal(&var_cond);
-   sem_post(sem_con_nome);
+   sem_post(sem_with_name);
    break;
   }
   else {
    stack_iterator++;
-   stack[stack_iterator].val = matrice[i][j];
+   stack[stack_iterator].val = matrix[i][j];
    stack[stack_iterator].id = pthread_self();
   }
-  sem_post(sem_con_nome);
+  sem_post(sem_with_name);
    
  }
 
- if(sem_destroy(sem_con_nome)==-1) {
+ if(sem_destroy(sem_with_name)==-1) {
   printf("An error occured while destroying semaphore\n");
  }
  exit(0)
 }
 
 //consumer thread
-void *consumatore(void *args) {
+void *consumer(void *args) {
  int i,a,b,c;
  a = 0;;
  b = 0;
