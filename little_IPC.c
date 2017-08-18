@@ -1,3 +1,16 @@
+/*
+little_IPC: 
+the program is a little example of interprocess communication and multitasking in UNIX. 
+It accepts an integer argument "n" (better if in range [5:13] as input parameter, create 
+two processes , a pipe and a file (ensure you have enough disk space:) ), and make them 
+communicating on that pipe. At first the processes have to wait for the main process to 
+signal them, then they start: the first one produce numbers in range [1:50] for "n" seconds 
+on the pipe, and the second one read them and write them on a temporary file. At the end
+both terminate and signal the main process, that print the file content and then terminates 
+as well (unlinking the file). Synchronization is ensured by using signals and using of 
+"pause" function with a global variable received (as condition for waiting), and on the 
+other hand with the pipe blocking and unblocking system; have to notice that the descriptors
+of the pipe and the file are closed properly within each process. */
 //static linking
 #include <unistd.h>
 #include <signal.h>
